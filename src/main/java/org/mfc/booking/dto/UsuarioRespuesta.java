@@ -8,6 +8,7 @@ import java.util.List;
 
 @Data @AllArgsConstructor @NoArgsConstructor
 public class UsuarioRespuesta {
+
     private List<UsuarioDto> contenido;
     private int numeroPaginas;
     private int medidaPagina;
