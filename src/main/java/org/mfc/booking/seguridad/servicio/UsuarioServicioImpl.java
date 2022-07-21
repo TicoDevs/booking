@@ -1,5 +1,6 @@
 package org.mfc.booking.seguridad.servicio;
 
+import org.mfc.booking.dto.Mensaje;
 import org.mfc.booking.dto.UsuarioDto;
 import org.mfc.booking.dto.UsuarioRespuesta;
 import org.mfc.booking.excepcion.ResourceNotFoundException;
@@ -14,6 +15,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,31 +32,36 @@ import static org.mfc.booking.seguridad.enums.RolNombre.*;
 @Service
 @Transactional
 public class UsuarioServicioImpl implements UsuarioServicio{
+
     @Autowired
     UsuarioRepositorio usuarioRepositorio;
     @Autowired
     RolServicio rolServicio;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
 
     @Override
-    public Optional<Usuario> obtenerPorNombreUsuario(String nombreUsuario){
-        return usuarioRepositorio.findByNombreUsuario(nombreUsuario);
-    }
-
-    @Override
-    public boolean existePorNombreUsuario(String nombreUsuario){
-        return usuarioRepositorio.existsByNombreUsuario(nombreUsuario);
-    }
-
-    @Override
-    public boolean existePorEmail(String email){
-        return usuarioRepositorio.existsByEmail(email);
-    }
-
-    @Override
-    public void crear(Usuario usuario){
-        usuarioRepositorio.save(usuario);
+    public UsuarioDto registarUsuario(NuevoUsuario nuevoUsuario) {
+        Usuario usuario =
+                new Usuario(nuevoUsuario.getNombre(), nuevoUsuario.getNombreUsuario(), nuevoUsuario.getEmail(),
+                        passwordEncoder.encode(nuevoUsuario.getPassword()));
+        Set<Rol> roles = new HashSet<>();
+        for( Rol rol : nuevoUsuario.getRoles()) {
+            if (rol.getRolNombre().equals(RolNombre.ROLE_GENE)) {
+                roles.add(rolServicio.getByRolNombre(RolNombre.ROLE_GENE).get());
+            }
+            if (rol.getRolNombre().equals(RolNombre.ROLE_AUX)) {
+                roles.add(rolServicio.getByRolNombre(RolNombre.ROLE_AUX).get());
+            }
+            if (rol.getRolNombre().equals(RolNombre.ROLE_ADMIN))
+                roles.add(rolServicio.getByRolNombre(RolNombre.ROLE_ADMIN).get());
+        }
+        usuario.setRoles(roles);
+        Usuario usuarioNuevo = usuarioRepositorio.save(usuario);
+        return mappearDTO(usuarioNuevo);
     }
 
     @Override
@@ -83,26 +92,52 @@ public class UsuarioServicioImpl implements UsuarioServicio{
     @Override
     public UsuarioDto obtenerUsuarioPorId(long id) {
         Usuario usuario =  usuarioRepositorio.findById(id)
-                .orElseThrow(() ->new ResourceNotFoundException("Usuario","Id", id));
+                .orElseThrow(() ->new ResourceNotFoundException("Usuario","Id", String.valueOf(id)));
+        Usuario nuevoUsu = new Usuario();
+
         return mappearDTO(usuario);
     }
+
+    @Override
+    public UsuarioDto obtenerPorNombreUsuario(String nombreUsuario){
+        Usuario usuario = usuarioRepositorio.findByNombreUsuario(nombreUsuario).orElseThrow(()-> new ResourceNotFoundException("Usuario","nombre usuario",nombreUsuario));
+        return  mappearDTO(usuario);
+    }
+
+    @Override
+    public UsuarioDto obtenerPorNombreUsuarioOEmail(String nombreUsuario) {
+        Usuario usuario = usuarioRepositorio.findByNombreUsuarioOrEmail(nombreUsuario, nombreUsuario).orElseThrow(()-> new ResourceNotFoundException("Usuario","nombre usuario",nombreUsuario));
+        return  mappearDTO(usuario);
+    }
+
+    @Override
+    public boolean existePorNombreUsuario(String nombreUsuario){
+        return usuarioRepositorio.existsByNombreUsuario(nombreUsuario);
+    }
+
+    @Override
+    public boolean existePorEmail(String email){
+        return usuarioRepositorio.existsByEmail(email);
+    }
+
 
     @Override
     public UsuarioDto actualizarUsuario(NuevoUsuario nuevoUsuario, long id) {
         Set<Rol> roles = new HashSet<>();
         Usuario usuario =  usuarioRepositorio.findById(id)
-                .orElseThrow(() ->new ResourceNotFoundException("Usuario","Id", id));
+                .orElseThrow(() ->new ResourceNotFoundException("Usuario","Id", String.valueOf(id)));
         usuario.setNombreUsuario(nuevoUsuario.getNombreUsuario());
         usuario.setNombre(nuevoUsuario.getNombre());
         usuario.setEmail(nuevoUsuario.getEmail());
-        if(nuevoUsuario.getRoles().contains("gene")) {
-            roles.add(rolServicio.getByRolNombre(ROLE_GENE).get());
-        }
-        if(nuevoUsuario.getRoles().contains("auxi")){
-            roles.add(rolServicio.getByRolNombre(ROLE_AUX).get());
-        }
-        if(nuevoUsuario.getRoles().contains("admin")) {
-            roles.add(rolServicio.getByRolNombre(ROLE_ADMIN).get());
+        for( Rol rol : nuevoUsuario.getRoles()) {
+            if (rol.getRolNombre().equals(RolNombre.ROLE_GENE)) {
+                roles.add(rolServicio.getByRolNombre(RolNombre.ROLE_GENE).get());
+            }
+            if (rol.getRolNombre().equals(RolNombre.ROLE_AUX)) {
+                roles.add(rolServicio.getByRolNombre(RolNombre.ROLE_AUX).get());
+            }
+            if (rol.getRolNombre().equals(RolNombre.ROLE_ADMIN))
+                roles.add(rolServicio.getByRolNombre(RolNombre.ROLE_ADMIN).get());
         }
         usuario.setRoles(roles);
         Usuario usuarioAct = usuarioRepositorio.save(usuario);
@@ -112,7 +147,7 @@ public class UsuarioServicioImpl implements UsuarioServicio{
     @Override
     public void eliminarUsuario(long id) {
         Usuario usuario =  usuarioRepositorio.findById(id)
-                .orElseThrow(() ->new ResourceNotFoundException("Usuario","Id", id));
+                .orElseThrow(() ->new ResourceNotFoundException("Usuario","Id", String.valueOf(id)));
         usuarioRepositorio.delete(usuario);
     }
 

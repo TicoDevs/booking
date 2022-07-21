@@ -7,7 +7,9 @@ import org.mfc.booking.seguridad.entidad.Rol;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,4 +23,5 @@ public class UsuarioDto {
     private String email;
     private String password;
     private Set<Rol> roles = new HashSet<>();
+
 }

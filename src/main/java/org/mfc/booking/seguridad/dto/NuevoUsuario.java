@@ -1,22 +1,19 @@
 package org.mfc.booking.seguridad.dto;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import org.mfc.booking.seguridad.entidad.Rol;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class NuevoUsuario {
-    @NotBlank
+
     private String nombre;
-    @NotBlank
     private String nombreUsuario;
-    @Email
     private String email;
-    @NotBlank
     private String password;
-    private Set<String> roles = new HashSet<>();
+    private Set<Rol> roles = new HashSet<>();
 }

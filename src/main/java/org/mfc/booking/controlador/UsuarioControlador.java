@@ -1,13 +1,17 @@
 package org.mfc.booking.controlador;
 
+import org.mfc.booking.dto.Mensaje;
 import org.mfc.booking.dto.UsuarioDto;
 import org.mfc.booking.dto.UsuarioRespuesta;
 import org.mfc.booking.seguridad.dto.NuevoUsuario;
+import org.mfc.booking.seguridad.dto.RolDto;
+import org.mfc.booking.seguridad.servicio.RolServicio;
 import org.mfc.booking.seguridad.servicio.UsuarioServicio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -16,14 +20,24 @@ import java.util.List;
 
 import static org.mfc.booking.constantes.AppConstantes.*;
 
-@CrossOrigin(origins = {"*"})
+@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600, allowCredentials="true")
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuarioControlador {
 
     @Autowired
     private UsuarioServicio usuarioServicio;
+    @Autowired
+    private RolServicio rolServicio;
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
+    @GetMapping("/all")
+    public String allAccess() {
+        return "Public Content.";
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public UsuarioRespuesta listarUsuario(
             @RequestParam(value = "pageNo", defaultValue = NUMERO_PAGINA_DEFECTO, required = false) int pageNo,
@@ -33,26 +47,51 @@ public class UsuarioControlador {
         return usuarioServicio.obtenerTodosLosUsuarios(pageNo, pageSize, ordernarPor, sortDir);
     }
 
+    @GetMapping("/roles")
+    public List<RolDto> getRoles(){
+        return  rolServicio.listar();
+    }
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/listar")
     public List<UsuarioDto> listar(){
         return usuarioServicio.listar();
     }
 
-  @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/buscarId/{id}")
     public ResponseEntity<UsuarioDto> obtenerUsuarioPorId(@PathVariable(name = "id")long id){
         return ResponseEntity.ok(usuarioServicio.obtenerUsuarioPorId(id));
     }
+
+    @GetMapping("/buscarNombre/{nombreUsuOEmail}")
+    public ResponseEntity<UsuarioDto> obtenerUsuarioPorNombreUsuarioOEmail(@PathVariable(name = "nombreUsuOEmail")String userNameOEmail){
+        return ResponseEntity.ok(usuarioServicio.obtenerPorNombreUsuarioOEmail(userNameOEmail));
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioDto> actualizarUsuario(@RequestBody NuevoUsuario nuevoUsuario, @PathVariable(name = "id")long id){
+    public ResponseEntity<UsuarioDto> actualizarUsuario(@Valid @RequestBody NuevoUsuario nuevoUsuario, @PathVariable(name = "id")long id){
         UsuarioDto usuarioRespuesta = usuarioServicio.actualizarUsuario(nuevoUsuario,id);
         return  new ResponseEntity<>(usuarioRespuesta, HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> eliminarPublicacion(@PathVariable(name = "id")long id){
+    public ResponseEntity<String> eliminar(@PathVariable(name = "id")long id){
         usuarioServicio.eliminarUsuario(id);
-        return new ResponseEntity<>("Usuario eliminado con exito", HttpStatus.OK);
+        return new ResponseEntity(new Mensaje("Usuario eliminado con exito"), HttpStatus.OK);
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/crear")
+    public ResponseEntity<UsuarioDto> registrar(@RequestBody NuevoUsuario nuevoUsuario) {
+        if (usuarioServicio.existePorNombreUsuario(nuevoUsuario.getNombreUsuario()))
+            return new ResponseEntity(new Mensaje("ese nombre ya existe"), HttpStatus.BAD_REQUEST);
+        if (usuarioServicio.existePorEmail(nuevoUsuario.getEmail()))
+            return new ResponseEntity(new Mensaje("ese email ya existe"), HttpStatus.BAD_REQUEST);
+        UsuarioDto usuarioDto = usuarioServicio.registarUsuario(nuevoUsuario);
+        return  new ResponseEntity<>(usuarioDto, HttpStatus.OK);
+    }
+
+
 }
