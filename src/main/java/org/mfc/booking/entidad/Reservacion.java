@@ -1,31 +1,35 @@
 package org.mfc.booking.entidad;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
+import org.mfc.booking.seguridad.entidad.Usuario;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 
 @Entity
-@Data @AllArgsConstructor
+@Getter
+@Setter
+@AllArgsConstructor
 @NoArgsConstructor
 public class Reservacion {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private Date fechaReservacion;
-    private Boolean estado;
+    private Integer estado;
     private Integer tipo;
-    private long idMiembro;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "reservacion")
-    private List<DetalleReservacionProd> prodSet;
-    private long idCita;
+    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reservUsu_id")
+    private Usuario usuario;
+    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "reservacion_id")
+    private Set<DetalleReservacionProd> prod = new HashSet<>();
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "cita_id")
+    private Cita cita;
     private String detalleReserva;
+
 }

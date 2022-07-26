@@ -1,10 +1,15 @@
 package org.mfc.booking.servicio;
 
-import org.mfc.booking.dto.ReservacionContent;
-import org.mfc.booking.dto.ReservacionDto;
+import org.mfc.booking.dto.*;
+import org.mfc.booking.entidad.Cita;
+import org.mfc.booking.entidad.DetalleReservacionProd;
+import org.mfc.booking.entidad.Producto;
 import org.mfc.booking.entidad.Reservacion;
 import org.mfc.booking.excepcion.ResourceNotFoundException;
 import org.mfc.booking.repositorio.ReservacionRepositorio;
+import org.mfc.booking.seguridad.entidad.Rol;
+import org.mfc.booking.seguridad.entidad.Usuario;
+import org.mfc.booking.seguridad.servicio.UsuarioServicio;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,13 +32,18 @@ public class ReservacionServicioImpl implements  ReservacionServicio{
     @Autowired
     ReservacionRepositorio reservacionRepositorio;
     @Autowired
+    ProductoServicio productoServicio;
+    @Autowired
+    UsuarioServicio usuarioServicio;
+    @Autowired
     private ModelMapper modelMapper;
 
 
     @Override
     public List<ReservacionDto> listar() {
         List<Reservacion> reservacionList = reservacionRepositorio.findAll();
-        List<ReservacionDto> reservacionDtoList = reservacionList.stream().map(usuario -> mappearDTO(usuario)).collect(Collectors.toList());
+
+        List<ReservacionDto> reservacionDtoList = reservacionList.stream().map(reservacion -> mappearDTO(reservacion)).collect(Collectors.toList());
         return reservacionDtoList;
     }
 
@@ -54,9 +65,8 @@ public class ReservacionServicioImpl implements  ReservacionServicio{
         return reservacionContent;
     }
 
-
-
     @Override
+    @Transactional(readOnly = true)
     public ReservacionDto obtenerReservacionPorId(Long Id) {
         Reservacion reservacion =  reservacionRepositorio.findById(Id)
                 .orElseThrow(() ->new ResourceNotFoundException("Reservacion","Id", String.valueOf(Id)));
@@ -70,10 +80,44 @@ public class ReservacionServicioImpl implements  ReservacionServicio{
 
 
     @Override
-    public ReservacionDto crear(ReservacionDto reservacionDto) {
+    public ReservacionDto crearReservProd(ReservacionDto reservacionDto) {
         //Convertimos de DTO a entidad
-        Reservacion reservacion = mappearEntidad(reservacionDto);
-        Reservacion nueva = reservacionRepositorio.save(reservacion);
+        Reservacion nuevaReserv = new Reservacion();
+        nuevaReserv.setFechaReservacion(reservacionDto.getFechaReservacion());
+        nuevaReserv.setEstado(reservacionDto.getEstado());
+        nuevaReserv.setTipo(reservacionDto.getTipo());
+        UsuarioDto usuarioDto = usuarioServicio.obtenerUsuarioPorId(reservacionDto.getUsuario().getId());
+        nuevaReserv.setUsuario(mappearEntidadUsu(usuarioDto));
+        Set<DetalleReservacionProd> detProd = new HashSet<>();
+        for (DetalleReservacionProdDto det: reservacionDto.getProd() ) {
+            DetalleReservacionProd detNuevo = new DetalleReservacionProd();
+            detNuevo.setCantidad(det.getCantidad());
+            detNuevo.setProducto(mappearEntidadProd(det.getProducto()));
+            detProd.add(detNuevo);
+        }
+        nuevaReserv.setProd(detProd);
+        nuevaReserv.setDetalleReserva(reservacionDto.getDetalleReserva());
+        Reservacion nueva = reservacionRepositorio.save(nuevaReserv);
+        //Convertimos de entidad a DTO
+         ReservacionDto reservacionDtoRespuesta = mappearDTO(nueva);
+        return reservacionDtoRespuesta;
+    }
+    @Override
+    public ReservacionDto crearReservCita(ReservacionDto reservacionDto) {
+        //Convertimos de DTO a entidad
+        Reservacion nuevaReserv = new Reservacion();
+        nuevaReserv.setFechaReservacion(reservacionDto.getFechaReservacion());
+        nuevaReserv.setEstado(reservacionDto.getEstado());
+        nuevaReserv.setTipo(reservacionDto.getTipo());
+        UsuarioDto usuarioDto = usuarioServicio.obtenerUsuarioPorId(reservacionDto.getUsuario().getId());
+        nuevaReserv.setUsuario(mappearEntidadUsu(usuarioDto));
+        Cita citaNueva = new Cita(reservacionDto.getCita().getFechaCita(), reservacionDto.getCita().getEstado(),reservacionDto.getCita().getDescripcion());
+/*        citaNueva.setFechaCita();
+        citaNueva.setEstado();
+        citaNueva.setDescripcion();*/
+        nuevaReserv.setCita(citaNueva);
+        nuevaReserv.setDetalleReserva(reservacionDto.getDetalleReserva());
+        Reservacion nueva = reservacionRepositorio.save(nuevaReserv);
         //Convertimos de entidad a DTO
         ReservacionDto reservacionDtoRespuesta = mappearDTO(nueva);
         return reservacionDtoRespuesta;
@@ -87,15 +131,14 @@ public class ReservacionServicioImpl implements  ReservacionServicio{
         reservacion.setFechaReservacion(reservacionDto.getFechaReservacion());
         reservacion.setEstado(reservacionDto.getEstado());
         reservacion.setTipo(reservacion.getTipo());
-        reservacion.setIdMiembro(reservacionDto.getIdMiembro());
-        reservacion.setProdSet(reservacionDto.getProdSet());
-        reservacion.setIdCita(reservacionDto.getIdCita());
+            reservacion.setCita(reservacionDto.getCita());
 
         Reservacion reservacionActualizada = reservacionRepositorio.save(reservacion);
         return mappearDTO(reservacionActualizada);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public void eliminarReservacion(long id) {
         Reservacion reservacion = reservacionRepositorio.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservacion", "Id", String.valueOf(id)));
@@ -109,5 +152,15 @@ public class ReservacionServicioImpl implements  ReservacionServicio{
     private Reservacion mappearEntidad(ReservacionDto reservacionDto) {
         Reservacion reservacion = modelMapper.map(reservacionDto, Reservacion.class);
         return reservacion;
+    }
+
+    private Producto mappearEntidadProd(ProductoDto productoDto) {
+        Producto producto = modelMapper.map(productoDto, Producto.class);
+        return producto;
+    }
+
+    private Usuario mappearEntidadUsu(UsuarioDto usuarioDto) {
+        Usuario usuario = modelMapper.map(usuarioDto, Usuario.class);
+        return usuario;
     }
 }

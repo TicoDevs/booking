@@ -10,11 +10,7 @@ import org.mfc.booking.entidad.Reservacion;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DetalleReservacionProdDto {
-
         private long id;
-        private long idProducto;
-        private String codigo;
         private Integer cantidad;
-        private Reservacion reservacion;
-
+        private ProductoDto producto;
 }

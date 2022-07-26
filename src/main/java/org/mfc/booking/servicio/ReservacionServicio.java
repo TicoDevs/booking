@@ -12,7 +12,8 @@ public interface ReservacionServicio {
     public ReservacionContent listarPagSort(int pageNo, int pageSize, String ordernarPor, String sortDir);
     public ReservacionDto obtenerReservacionPorId(Long Id);
     public boolean existePorId(long id);
-    public ReservacionDto crear(ReservacionDto reservacionDto);
+    public ReservacionDto crearReservProd(ReservacionDto reservacionDto);
+    public ReservacionDto crearReservCita(ReservacionDto reservacionDto);
     public ReservacionDto actualizarReservacion(ReservacionDto reservacionDto, long id);
     public void eliminarReservacion(long id);
 }

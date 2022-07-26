@@ -15,6 +15,8 @@ public interface ProductoServicio {
     public boolean existePorNombre(String nombre);
     public ProductoDto crear(ProductoDto productoDto);
     public ProductoDto actualizarProducto(ProductoDto productoDto, long id);
+    public ProductoDto actualizarProductoReserv(ProductoDto productoDto, long id);
+    public ProductoDto actProdCambioEstado(ProductoDto productoDto, long id);
     public void eliminarProducto(long id);
 
 }
