@@ -97,7 +97,7 @@ public class ProductoServicioImpl implements ProductoServicio {
         bit.setIdProducto(nueva.getId());
         bit.setFechaIngreso(new Date());
         bit.setUltimaModificacion(new Date());
-        bit.setDescripcion("Libro: " + nueva.getNombre() + " ISBN:" + nueva.getCodigo() + " Proceso: Ingresó libro" + " /Usuario: " + usu.getNombre());
+        bit.setDescripcion("Producto: " + nueva.getNombre() + " ISBN:" + nueva.getCodigo() + " Proceso: Ingresó producto" + " /Usuario: " + usu.getNombre());
         bit.setEstado(Boolean.TRUE);
         bitacoraServicio.crearBitacora(bit);
         return productoDtoRepuesta;
@@ -111,11 +111,7 @@ public class ProductoServicioImpl implements ProductoServicio {
         producto.setDescripcion(productoDto.getDescripcion());
         producto.setCantidad(productoDto.getCantidad());
         producto.setEstado(productoDto.getEstado());
-        Set<String> imagenes = new HashSet<String>();
-        if (!productoDto.getImg().isEmpty()){
-            imagenes.addAll(productoDto.getImg());
-            producto.setImg(imagenes.stream().collect(Collectors.toSet()));
-        }
+        producto.setImagenes(productoDto.getImagenes());
         producto.setCodigo(productoDto.getCodigo());
         Producto productoActualizada = productoRepositorio.save(producto);
         UsuarioDto usu = this.util.obtenerUsuarioActual();
@@ -126,7 +122,7 @@ public class ProductoServicioImpl implements ProductoServicio {
         bit.setId(Long.valueOf(0));
         bit.setIdUsuario(usu.getId());
         bit.setUltimaModificacion(new Date());
-        bit.setDescripcion("Libro: " + productoActualizada.getNombre() + " ISBN:" + productoActualizada.getCodigo() + " Proceso: Actualizó libro" + " /Usuario: " + usu.getNombre());
+        bit.setDescripcion("Producto: " + productoActualizada.getNombre() + " ISBN:" + productoActualizada.getCodigo() + " Proceso: Actualizó producto" + " /Usuario: " + usu.getNombre());
         bitacoraServicio.crearBitacora(bit);
         return mappearDTO(productoActualizada);
 
@@ -140,11 +136,7 @@ public class ProductoServicioImpl implements ProductoServicio {
         producto.setDescripcion(productoDto.getDescripcion());
         producto.setCantidad(productoDto.getCantidad());
         producto.setEstado(productoDto.getEstado());
-        Set<String> imagenes = new HashSet<String>();
-        if (!productoDto.getImg().isEmpty()){
-            imagenes.addAll(productoDto.getImg());
-            producto.setImg(imagenes.stream().collect(Collectors.toSet()));
-        }
+        producto.setImagenes(productoDto.getImagenes());
         producto.setCodigo(productoDto.getCodigo());
         Producto productoActualizada = productoRepositorio.save(producto);
         UsuarioDto usu = this.util.obtenerUsuarioActual();
@@ -155,7 +147,7 @@ public class ProductoServicioImpl implements ProductoServicio {
         bit.setId(Long.valueOf(0));
         bit.setIdUsuarioMiembro(usu.getId());
         bit.setUltimaModificacion(new Date());
-        bit.setDescripcion("Libro: " + productoActualizada.getNombre() + " ISBN:" + productoActualizada.getCodigo() + " Proceso: Reserva realizada a: " + " /Miembro: " + usu.getNombre());
+        bit.setDescripcion("Producto: " + productoActualizada.getNombre() + " ISBN:" + productoActualizada.getCodigo() + " Proceso: Reserva realizada a: " + " /Miembro: " + usu.getNombre());
         bitacoraServicio.crearBitacora(bit);
         return mappearDTO(productoActualizada);
     }
@@ -167,11 +159,12 @@ public class ProductoServicioImpl implements ProductoServicio {
         producto.setDescripcion(productoDto.getDescripcion());
         producto.setCantidad(productoDto.getCantidad());
         producto.setEstado(productoDto.getEstado());
-        Set<String> imagenes = new HashSet<String>();
+/*        List<ImageModel> imagenes = new ArrayList<ImageModel>();
         if (!productoDto.getImg().isEmpty()){
             imagenes.addAll(productoDto.getImg());
-            producto.setImg(imagenes.stream().collect(Collectors.toSet()));
-        }
+            producto.setImg(imagenes.stream().collect(Collectors.toList()));
+        }*/
+        producto.setImagenes(productoDto.getImagenes());
         producto.setCodigo(productoDto.getCodigo());
         Producto productoActualizada = productoRepositorio.save(producto);
         UsuarioDto usu = this.util.obtenerUsuarioActual();
@@ -181,7 +174,7 @@ public class ProductoServicioImpl implements ProductoServicio {
         BitacoraDto bit = lstBit.get(0);
         bit.setId(Long.valueOf(0));
         bit.setUltimaModificacion(new Date());
-        bit.setDescripcion("Libro: " + productoActualizada.getNombre() + " ISBN:" + productoActualizada.getCodigo() + " Proceso: Cancelación reserva, reintegro de libro." + " /Usuario: " + usu.getNombre());
+        bit.setDescripcion("Producto: " + productoActualizada.getNombre() + " ISBN:" + productoActualizada.getCodigo() + " Proceso: Cancelación reserva, reintegro de producto." + " /Usuario: " + usu.getNombre());
         bitacoraServicio.crearBitacora(bit);
         return mappearDTO(productoActualizada);
     }
@@ -199,7 +192,7 @@ public class ProductoServicioImpl implements ProductoServicio {
         bit.setId(Long.valueOf(0));
         bit.setIdUsuario(usu.getId());
         bit.setUltimaModificacion(new Date());
-        bit.setDescripcion("Libro: " + producto.getNombre() + " ISBN:" + producto.getCodigo() + " Proceso: Se elimino por :" + " /Miembro: " + usu.getNombre());
+        bit.setDescripcion("Producto: " + producto.getNombre() + " ISBN:" + producto.getCodigo() + " Proceso: Se elimino por :" + " /Miembro: " + usu.getNombre());
         bitacoraServicio.crearBitacora(bit);
     }
 

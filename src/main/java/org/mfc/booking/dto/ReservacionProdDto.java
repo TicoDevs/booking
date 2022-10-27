@@ -1,4 +1,5 @@
 package org.mfc.booking.dto;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,13 +12,9 @@ import java.util.Set;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ReservacionDto {
-    private long id;
+public class ReservacionProdDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate fechaReservacion;
-    private Integer estado;
-    private Integer tipo;
-    private UsuarioDto usuario;
     private Set<DetalleReservacionProdDto> prod = new HashSet<>();
     private String detalleReserva;
 }

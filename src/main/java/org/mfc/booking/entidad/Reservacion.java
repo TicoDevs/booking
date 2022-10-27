@@ -4,6 +4,7 @@ import lombok.*;
 import org.mfc.booking.seguridad.entidad.Usuario;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.*;
 
 
@@ -16,7 +17,7 @@ public class Reservacion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private Date fechaReservacion;
+    private LocalDate fechaReservacion;
     private Integer estado;
     private Integer tipo;
     @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
@@ -27,9 +28,6 @@ public class Reservacion {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "reservacion_id")
     private Set<DetalleReservacionProd> prod = new HashSet<>();
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "cita_id")
-    private Cita cita;
     private String detalleReserva;
 
 }

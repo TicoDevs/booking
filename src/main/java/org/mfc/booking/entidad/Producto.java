@@ -6,7 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.Set;
+import java.util.*;
+
 
 @Entity
 @Data @AllArgsConstructor @NoArgsConstructor
@@ -18,8 +19,16 @@ public class Producto {
     private String descripcion;
     private int cantidad;
     private Boolean estado;
-    @ElementCollection(targetClass=String.class)
-    private Set<String> img;
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(name = "img_prod",
+        joinColumns = {
+            @JoinColumn(name = "prod_id")
+        },
+        inverseJoinColumns = {
+            @JoinColumn(name = "image_id")
+        }
+    )
+    private Set<ImageModel> imagenes;
     @Column(unique=true)
     private String codigo;
 }

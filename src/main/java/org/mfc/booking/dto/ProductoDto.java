@@ -2,9 +2,9 @@ package org.mfc.booking.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.mfc.booking.entidad.ImageModel;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.util.Set;
 
 
@@ -23,19 +23,17 @@ public class ProductoDto {
     private int cantidad;
     @NotNull
     private Boolean estado;
-    /*@NotNull
-    @Size(min = 1, message = "Al menos debe de agregar un rol")*/
-    private Set<String> img;
+    private Set<ImageModel> imagenes;
     @NotNull
     private String codigo;
 
 
-    public ProductoDto(String nombre, String descripcion, int cantidad, Boolean estado, Set<String> img, String codigo) {
+    public ProductoDto(String nombre, String descripcion, int cantidad, Boolean estado, Set<ImageModel> imagenes, String codigo) {
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.cantidad = cantidad;
         this.estado = estado;
-        this.img = img;
+        this.imagenes = imagenes;
         this.codigo = codigo;
     }
 

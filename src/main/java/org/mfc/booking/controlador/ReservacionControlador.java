@@ -1,14 +1,18 @@
 package org.mfc.booking.controlador;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.mfc.booking.dto.*;
 import org.mfc.booking.servicio.*;
 import org.mfc.booking.util.Utilidades;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,8 +29,7 @@ public class ReservacionControlador {
     DetalleReservacionProdServicio detalleReservacionProdServicio;
     @Autowired
     ProductoServicio productoService;
-    @Autowired
-    CitaServicio citaService;
+
     @Autowired
     BitacoraServicio bitacoraServicio;
     @Autowired
@@ -35,20 +38,20 @@ public class ReservacionControlador {
 
 
     @PostMapping("/crearReservacion")
-    public ResponseEntity<ReservacionDto> crearReservacion(@RequestBody ReservacionDto reservacionDto){
+    public ResponseEntity<ReservacionDto> crearReservacion(@RequestBody ReservacionProdDto reservacionProdDto){
         Set<String> salida = new HashSet<>();
         ReservacionDto nuevaReserv = new ReservacionDto();
-        nuevaReserv.setFechaReservacion(reservacionDto.getFechaReservacion());
-        nuevaReserv.setEstado(reservacionDto.getEstado());
-        nuevaReserv.setTipo(reservacionDto.getTipo());
-        nuevaReserv.setUsuario(reservacionDto.getUsuario());
-        nuevaReserv.setDetalleReserva(reservacionDto.getDetalleReserva());
+        nuevaReserv.setFechaReservacion(reservacionProdDto.getFechaReservacion());
+        nuevaReserv.setEstado(Integer.valueOf(0));
+        nuevaReserv.setTipo(Integer.valueOf(0));
+        nuevaReserv.setUsuario(util.obtenerUsuarioActual());
+        nuevaReserv.setDetalleReserva(reservacionProdDto.getDetalleReserva());
         Set<DetalleReservacionProdDto> setDet = new HashSet<>();
         Set<ProductoDto> setProd = new HashSet<>();
-        for ( DetalleReservacionProdDto dto : reservacionDto.getProd()) {
+        for ( DetalleReservacionProdDto dto : reservacionProdDto.getProd()) {
             ProductoDto prodDto = productoService.obtenerProductoPorId(dto.getProducto().getId());
             if (prodDto.getCantidad() < dto.getCantidad() ){
-                salida.add("Libro: " + prodDto.getNombre() + " " + ".No hay cantidad suficiente");
+                salida.add("Producto: " + prodDto.getNombre() + " " + ".No hay cantidad suficiente");
             }else{
                 DetalleReservacionProdDto nuevoDet =  new DetalleReservacionProdDto();
                 nuevoDet.setCantidad(dto.getCantidad());
@@ -71,14 +74,13 @@ public class ReservacionControlador {
     }
 
     @PostMapping("/crearReservacionCita")
-    public ResponseEntity<?> crearReservacionCita(@RequestBody ReservacionDto reservacionDto){
+    public ResponseEntity<?> crearReservacionCita(@RequestBody ReservacionCitaDto reservacionCitaDto){
         ReservacionDto nuevaReserv = new ReservacionDto();
-        nuevaReserv.setFechaReservacion(reservacionDto.getFechaReservacion());
-        nuevaReserv.setEstado(reservacionDto.getEstado());
-        nuevaReserv.setTipo(reservacionDto.getTipo());
-        nuevaReserv.setUsuario(reservacionDto.getUsuario());
-        nuevaReserv.setCita(reservacionDto.getCita());
-        nuevaReserv.setDetalleReserva(reservacionDto.getDetalleReserva());
+        nuevaReserv.setFechaReservacion(reservacionCitaDto.getFechaReservacion());
+        nuevaReserv.setEstado(Integer.valueOf(0));
+        nuevaReserv.setTipo(Integer.valueOf(1));
+        nuevaReserv.setUsuario(util.obtenerUsuarioActual());
+        nuevaReserv.setDetalleReserva(reservacionCitaDto.getDetalleReserva());
         if (reservacionService.crearReservCita(nuevaReserv) == null)
           return  new ResponseEntity(new Mensaje("No se pudo realizar la reserva." ),HttpStatus.BAD_REQUEST);
         return  new ResponseEntity(new Mensaje("Reserva realizada con exito." ),HttpStatus.OK);
@@ -104,6 +106,14 @@ public class ReservacionControlador {
         return ResponseEntity.ok(reservacionService.obtenerReservacionPorId(id));
     }
 
+    @GetMapping("/listarFechas")
+    public ResponseEntity<List<String>> listarFechasCita(){
+        List<String> fechas = reservacionService.listar().stream()
+                .map(item -> item.getFechaReservacion().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(fechas);
+    }
+
     @PutMapping("/cambiaEstadoReservacion/{id}/{estado}")
     public ResponseEntity<?> cambiaEstadoReservacion(@PathVariable(name = "id")long id, @PathVariable(name = "estado")int estado){
         if(!this.reservacionService.existePorId(id))
@@ -126,7 +136,7 @@ public class ReservacionControlador {
                         bit.setIdUsuario(usu.getId());
                         bit.setIdUsuarioMiembro(actualizada.getUsuario().getId());
                         bit.setUltimaModificacion(new Date());
-                        bit.setDescripcion("Libro: " + prodAct.getProducto().getNombre() + " ISBN:" + prodAct.getProducto().getCodigo() + " Proceso: Entrega Libro" + " /Miembro: " + usu.getNombre());
+                        bit.setDescripcion("Producto: " + prodAct.getProducto().getNombre() + " ISBN:" + prodAct.getProducto().getCodigo() + " Proceso: Entrega Libro" + " /Miembro: " + usu.getNombre());
                         bitacoraServicio.crearBitacora(bit);
                     }
                     break;

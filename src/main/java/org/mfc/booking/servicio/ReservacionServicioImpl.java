@@ -1,13 +1,11 @@
 package org.mfc.booking.servicio;
 
 import org.mfc.booking.dto.*;
-import org.mfc.booking.entidad.Cita;
 import org.mfc.booking.entidad.DetalleReservacionProd;
 import org.mfc.booking.entidad.Producto;
 import org.mfc.booking.entidad.Reservacion;
 import org.mfc.booking.excepcion.ResourceNotFoundException;
 import org.mfc.booking.repositorio.ReservacionRepositorio;
-import org.mfc.booking.seguridad.entidad.Rol;
 import org.mfc.booking.seguridad.entidad.Usuario;
 import org.mfc.booking.seguridad.servicio.UsuarioServicio;
 import org.modelmapper.ModelMapper;
@@ -19,7 +17,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -111,11 +108,6 @@ public class ReservacionServicioImpl implements  ReservacionServicio{
         nuevaReserv.setTipo(reservacionDto.getTipo());
         UsuarioDto usuarioDto = usuarioServicio.obtenerUsuarioPorId(reservacionDto.getUsuario().getId());
         nuevaReserv.setUsuario(mappearEntidadUsu(usuarioDto));
-        Cita citaNueva = new Cita(reservacionDto.getCita().getFechaCita(), reservacionDto.getCita().getEstado(),reservacionDto.getCita().getDescripcion());
-/*        citaNueva.setFechaCita();
-        citaNueva.setEstado();
-        citaNueva.setDescripcion();*/
-        nuevaReserv.setCita(citaNueva);
         nuevaReserv.setDetalleReserva(reservacionDto.getDetalleReserva());
         Reservacion nueva = reservacionRepositorio.save(nuevaReserv);
         //Convertimos de entidad a DTO
@@ -131,8 +123,6 @@ public class ReservacionServicioImpl implements  ReservacionServicio{
         reservacion.setFechaReservacion(reservacionDto.getFechaReservacion());
         reservacion.setEstado(reservacionDto.getEstado());
         reservacion.setTipo(reservacion.getTipo());
-            reservacion.setCita(reservacionDto.getCita());
-
         Reservacion reservacionActualizada = reservacionRepositorio.save(reservacion);
         return mappearDTO(reservacionActualizada);
     }

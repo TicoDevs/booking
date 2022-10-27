@@ -21,13 +21,10 @@ public class CitaDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date fechaCita;
     @NotNull
-    private Boolean estado;
-    @NotNull
     private String descripcion;
 
     public CitaDto(Date fechaCita, boolean estado, String descripcion) {
         this.fechaCita = fechaCita;
-        this.estado = estado;
         this.descripcion = descripcion;
     }
 
