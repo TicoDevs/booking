@@ -5,7 +5,6 @@ import lombok.Data;
 import org.mfc.booking.seguridad.constantes.SecurityConstant;
 import org.springframework.security.core.GrantedAuthority;
 
-import java.beans.ConstructorProperties;
 import java.util.Collection;
 
 import static org.mfc.booking.seguridad.constantes.SecurityConstant.*;

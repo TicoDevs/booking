@@ -76,9 +76,9 @@ public class AuthController {
     @PostMapping("/registrar")
     public ResponseEntity<?> registrar(@RequestBody NuevoUsuario nuevoUsuario){
         if(usuarioRepositorio.existsByNombreUsuario(nuevoUsuario.getNombreUsuario()))
-            return new ResponseEntity(new Mensaje("ese nombre usuario ya existe"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(new Mensaje("Ya existe una cuenta con ese nombre de usuario"), HttpStatus.BAD_REQUEST);
         if(usuarioRepositorio.existsByEmail(nuevoUsuario.getEmail()))
-            return new ResponseEntity(new Mensaje("ese email ya existe"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(new Mensaje("Ya existe una cuenta con ese email"), HttpStatus.BAD_REQUEST);
         Usuario usuario =
                 new Usuario(nuevoUsuario.getNombre(), nuevoUsuario.getNombreUsuario(), nuevoUsuario.getEmail(),
                         passwordEncoder.encode(nuevoUsuario.getPassword()));
@@ -91,7 +91,7 @@ public class AuthController {
             roles.add(rolServicio.getByRolNombre(RolNombre.ROLE_ADMIN).get());*/
         usuario.setRoles(roles);
         usuarioRepositorio.save(usuario);
-        return new ResponseEntity(new Mensaje("usuario guardado"), HttpStatus.CREATED);
+        return new ResponseEntity(new Mensaje("Usuario guardado"), HttpStatus.CREATED);
     }
 
    @PostMapping("/signout")

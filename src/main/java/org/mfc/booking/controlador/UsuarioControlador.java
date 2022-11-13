@@ -86,9 +86,9 @@ public class UsuarioControlador {
     @PostMapping("/crear")
     public ResponseEntity<UsuarioDto> registrar(@RequestBody NuevoUsuario nuevoUsuario) {
         if (usuarioServicio.existePorNombreUsuario(nuevoUsuario.getNombreUsuario()))
-            return new ResponseEntity(new Mensaje("ese nombre ya existe"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(new Mensaje("Ya existe una cuenta con ese nombre de usuario"), HttpStatus.BAD_REQUEST);
         if (usuarioServicio.existePorEmail(nuevoUsuario.getEmail()))
-            return new ResponseEntity(new Mensaje("ese email ya existe"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(new Mensaje("Ya existe una cuenta con ese email"), HttpStatus.BAD_REQUEST);
         UsuarioDto usuarioDto = usuarioServicio.registarUsuario(nuevoUsuario);
         return  new ResponseEntity<>(usuarioDto, HttpStatus.OK);
     }
