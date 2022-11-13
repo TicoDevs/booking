@@ -69,15 +69,19 @@ public class ProductoControlador {
     @PostMapping(value = "/crear", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> crear(@RequestPart("product") ProductoDto productoDto, @RequestPart("imgFile")MultipartFile[] file) {
         try {
-            Set<ImageModel> images = uploadImage(file);
-            ProductoDto producto = new ProductoDto(productoDto.getNombre(), productoDto.getDescripcion(), productoDto.getCantidad(), productoDto.getEstado(), images, productoDto.getCodigo());
-            ProductoDto productoDtoRespuesta = productoServicio.crear(producto);
-            return new ResponseEntity<>(productoDtoRespuesta, HttpStatus.CREATED);
+            if(file.length>0) {
+                Set<ImageModel> images = uploadImage(file);
+                ProductoDto producto = new ProductoDto(productoDto.getNombre(), productoDto.getDescripcion(), productoDto.getCantidad(), productoDto.getEstado(), images, productoDto.getCodigo());
+                ProductoDto productoDtoRespuesta = productoServicio.crear(producto);
+                return new ResponseEntity<>(productoDtoRespuesta, HttpStatus.CREATED);
+            }else{
+                return new ResponseEntity<>(new Mensaje("Agregar al menos una imágen"), HttpStatus.BAD_REQUEST);
+            }
         }catch (Exception e){
             return new ResponseEntity<>(new Mensaje("error en el guardado"), HttpStatus.BAD_REQUEST);
         }
     }
- {}
+
     public  Set<ImageModel> uploadImage(MultipartFile[] multipartFiles) throws IOException {
         Set<ImageModel> imageModels = new HashSet<>();
         ImageModel imageModel = null;
@@ -97,10 +101,14 @@ public class ProductoControlador {
         if(!this.productoServicio.existePorId(productoDto.getId()))
             return new ResponseEntity(new Mensaje("no existe"), HttpStatus.NOT_FOUND);
         try {
-            Set<ImageModel> images = uploadImage(file);
-            ProductoDto producto = new ProductoDto(productoDto.getNombre(), productoDto.getDescripcion(), productoDto.getCantidad(), productoDto.getEstado(), images, productoDto.getCodigo());
-            ProductoDto productoDtoRespuesta = productoServicio.actualizarProducto(producto, productoDto.getId());
-            return new ResponseEntity<>(productoDtoRespuesta, HttpStatus.CREATED);
+            if(file.length>0) {
+                Set<ImageModel> images = uploadImage(file);
+                ProductoDto producto = new ProductoDto(productoDto.getNombre(), productoDto.getDescripcion(), productoDto.getCantidad(), productoDto.getEstado(), images, productoDto.getCodigo());
+                ProductoDto productoDtoRespuesta = productoServicio.actualizarProducto(producto, productoDto.getId());
+                return new ResponseEntity<>(productoDtoRespuesta, HttpStatus.CREATED);
+            }else{
+                return new ResponseEntity<>(new Mensaje("Agregar al menos una imágen"), HttpStatus.BAD_REQUEST);
+            }
         }catch (Exception e){
             return new ResponseEntity<>(new Mensaje("error en el guardado"), HttpStatus.BAD_REQUEST);
         }
