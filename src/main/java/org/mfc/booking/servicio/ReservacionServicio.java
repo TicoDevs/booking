@@ -10,6 +10,8 @@ public interface ReservacionServicio {
 
     public List<ReservacionDto> listar();
     public ReservacionContent listarPagSort(int pageNo, int pageSize, String ordernarPor, String sortDir);
+    public ReservacionContent listarProdPagSort(int pageNo, int pageSize, String ordernarPor, String sortDir);
+    public ReservacionContent listarCitaPagSort(int pageNo, int pageSize, String ordernarPor, String sortDir);
     public ReservacionDto obtenerReservacionPorId(Long Id);
     public boolean existePorId(long id);
     public ReservacionDto crearReservProd(ReservacionDto reservacionDto);

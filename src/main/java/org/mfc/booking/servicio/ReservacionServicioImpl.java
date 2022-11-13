@@ -50,7 +50,43 @@ public class ReservacionServicioImpl implements  ReservacionServicio{
         Pageable pageable = PageRequest.of(pageNo,pageSize, sort);
         Page<Reservacion> reservaciones = reservacionRepositorio.findAll(pageable);
         List<Reservacion> reservacionList = reservaciones.getContent();
-        List<ReservacionDto> contenido = reservacionList.stream().map(reservacion -> mappearDTO(reservacion))
+        List<ReservacionDto> contenido = reservacionList.stream().filter(e -> e.getEstado().equals(0)).map(reservacion -> mappearDTO(reservacion))
+                .collect(Collectors.toList());
+        ReservacionContent reservacionContent = new ReservacionContent();
+        reservacionContent.setNumeroPaginas(reservaciones.getNumber());
+        reservacionContent.setMedidaPagina(reservaciones.getSize());
+        reservacionContent.setTotalElementos(reservaciones.getTotalElements());
+        reservacionContent.setTotalPaginas(reservaciones.getTotalPages());
+        reservacionContent.setUltima(reservaciones.isLast());
+        reservacionContent.setContenido(contenido);
+        return reservacionContent;
+    }
+
+    @Override
+    public ReservacionContent listarProdPagSort(int pageNo, int pageSize, String ordernarPor, String sortDir) {
+        Sort sort  = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())?Sort.by(ordernarPor).ascending():Sort.by(ordernarPor).descending();
+        Pageable pageable = PageRequest.of(pageNo,pageSize, sort);
+        Page<Reservacion> reservaciones = reservacionRepositorio.findAll(pageable);
+        List<Reservacion> reservacionList = reservaciones.getContent();
+        List<ReservacionDto> contenido = reservacionList.stream().filter(e -> e.getTipo().equals(0)).map(reservacion -> mappearDTO(reservacion))
+                .collect(Collectors.toList());
+        ReservacionContent reservacionContent = new ReservacionContent();
+        reservacionContent.setNumeroPaginas(reservaciones.getNumber());
+        reservacionContent.setMedidaPagina(reservaciones.getSize());
+        reservacionContent.setTotalElementos(reservaciones.getTotalElements());
+        reservacionContent.setTotalPaginas(reservaciones.getTotalPages());
+        reservacionContent.setUltima(reservaciones.isLast());
+        reservacionContent.setContenido(contenido);
+        return reservacionContent;
+    }
+
+    @Override
+    public ReservacionContent listarCitaPagSort(int pageNo, int pageSize, String ordernarPor, String sortDir) {
+        Sort sort  = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())?Sort.by(ordernarPor).ascending():Sort.by(ordernarPor).descending();
+        Pageable pageable = PageRequest.of(pageNo,pageSize, sort);
+        Page<Reservacion> reservaciones = reservacionRepositorio.findAll(pageable);
+        List<Reservacion> reservacionList = reservaciones.getContent();
+        List<ReservacionDto> contenido = reservacionList.stream().filter(e -> e.getTipo().equals(1)).map(reservacion -> mappearDTO(reservacion))
                 .collect(Collectors.toList());
         ReservacionContent reservacionContent = new ReservacionContent();
         reservacionContent.setNumeroPaginas(reservaciones.getNumber());

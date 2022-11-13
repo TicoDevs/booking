@@ -97,8 +97,26 @@ public class ReservacionControlador {
 
     @GetMapping("/listar")
     public ResponseEntity<List<ReservacionDto>> listar(){
-        List<ReservacionDto> list = reservacionService.listar();
+        List<ReservacionDto> list = reservacionService.listar().stream().filter(e -> e.getEstado().equals(0)).collect(Collectors.toList());
         return new ResponseEntity(list, HttpStatus.OK);
+    }
+
+    @GetMapping("/listarReservProd")
+    public ResponseEntity<ReservacionContent> listarReservacionProductosContent(
+            @RequestParam(value = "pageNo", defaultValue = NUMERO_PAGINA_DEFECTO, required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = MEDIDA_PAGINA_DEFECTO, required = false) int pageSize,
+            @RequestParam(value = "sortBy", defaultValue = ORDENAR_POR_DEFECTO, required = false) String ordernarPor,
+            @RequestParam(value = "sortDir", defaultValue = ORDENAR_DIRECCCION_DEFECTO,required = false) String sortDir){
+        return new ResponseEntity(reservacionService.listarProdPagSort(pageNo, pageSize, ordernarPor, sortDir), HttpStatus.OK);
+    }
+
+    @GetMapping("/listarReservCita")
+    public ResponseEntity<ReservacionContent> listarReservacionCitaContent(
+            @RequestParam(value = "pageNo", defaultValue = NUMERO_PAGINA_DEFECTO, required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = MEDIDA_PAGINA_DEFECTO, required = false) int pageSize,
+            @RequestParam(value = "sortBy", defaultValue = ORDENAR_POR_DEFECTO, required = false) String ordernarPor,
+            @RequestParam(value = "sortDir", defaultValue = ORDENAR_DIRECCCION_DEFECTO,required = false) String sortDir){
+        return new ResponseEntity(reservacionService.listarCitaPagSort(pageNo, pageSize, ordernarPor, sortDir), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -118,46 +136,48 @@ public class ReservacionControlador {
     public ResponseEntity<?> cambiaEstadoReservacion(@PathVariable(name = "id")long id, @PathVariable(name = "estado")int estado){
         if(!this.reservacionService.existePorId(id))
             return new ResponseEntity(new Mensaje("no existe"), HttpStatus.NOT_FOUND);
-        ReservacionDto reservacionDtoRespuesta =reservacionService.obtenerReservacionPorId(id);
-        if (reservacionDtoRespuesta.getTipo() == 0){
-            switch (estado){
-                case 1:
-                    //Equivale a las aceptada
-                    UsuarioDto usu = this.util.obtenerUsuarioActual();
-                    reservacionDtoRespuesta.setEstado(estado);
-                    ReservacionDto actualizada = reservacionService.actualizarReservacion(reservacionDtoRespuesta,reservacionDtoRespuesta.getId());
-                    for (DetalleReservacionProdDto prodAct: actualizada.getProd()) {
-                        List<BitacoraDto> lstBit = bitacoraServicio.listar().stream().filter(x -> x.getIdProducto() == prodAct.getProducto().getId())
-                                .sorted(Comparator.comparing(BitacoraDto::getUltimaModificacion))
-                                .collect(Collectors.toList());
-                        BitacoraDto bit = lstBit.get(0);
-                        bit.setId(Long.valueOf(0));
-                        bit.setFechaSalida(new Date());
-                        bit.setIdUsuario(usu.getId());
-                        bit.setIdUsuarioMiembro(actualizada.getUsuario().getId());
-                        bit.setUltimaModificacion(new Date());
-                        bit.setDescripcion("Producto: " + prodAct.getProducto().getNombre() + " ISBN:" + prodAct.getProducto().getCodigo() + " Proceso: Entrega Libro" + " /Miembro: " + usu.getNombre());
-                        bitacoraServicio.crearBitacora(bit);
-                    }
-                    break;
-                case 2:
-                    //Equivale a las rechazada
-                    reservacionDtoRespuesta.setEstado(estado);
-                    ReservacionDto actualizada1 = reservacionService.actualizarReservacion(reservacionDtoRespuesta,reservacionDtoRespuesta.getId());
-                    for (DetalleReservacionProdDto prodAct: actualizada1.getProd()) {
-                        ProductoDto productoDto = productoService.obtenerProductoPorId(prodAct.getProducto().getId());
-                        productoDto.setCantidad(productoDto.getCantidad() + prodAct.getCantidad());
-                        productoService.actProdCambioEstado(productoDto,productoDto.getId());
-                    }
-                    break;
+        try {
+            ReservacionDto reservacionDtoRespuesta =reservacionService.obtenerReservacionPorId(id);
+            if (reservacionDtoRespuesta.getTipo() == 0){
+                switch (estado){
+                    case 1:
+                        //Equivale a las aceptada
+                        UsuarioDto usu = this.util.obtenerUsuarioActual();
+                        reservacionDtoRespuesta.setEstado(estado);
+                        ReservacionDto actualizada = reservacionService.actualizarReservacion(reservacionDtoRespuesta,reservacionDtoRespuesta.getId());
+                        for (DetalleReservacionProdDto prodAct: actualizada.getProd()) {
+                            List<BitacoraDto> lstBit = bitacoraServicio.listar().stream().filter(x -> x.getIdProducto() == prodAct.getProducto().getId())
+                                    .sorted(Comparator.comparing(BitacoraDto::getUltimaModificacion))
+                                    .collect(Collectors.toList());
+                            BitacoraDto bit = lstBit.get(0);
+                            bit.setId(Long.valueOf(0));
+                            bit.setFechaSalida(new Date());
+                            bit.setIdUsuario(usu.getId());
+                            bit.setIdUsuarioMiembro(actualizada.getUsuario().getId());
+                            bit.setUltimaModificacion(new Date());
+                            bit.setDescripcion("Producto: " + prodAct.getProducto().getNombre() + " ISBN:" + prodAct.getProducto().getCodigo() + " Proceso: Entrega Libro" + " /Miembro: " + usu.getNombre());
+                            bitacoraServicio.crearBitacora(bit);
+                        }
+                        break;
+                    case 2:
+                        //Equivale a las rechazada
+                        reservacionDtoRespuesta.setEstado(estado);
+                        ReservacionDto actualizada1 = reservacionService.actualizarReservacion(reservacionDtoRespuesta,reservacionDtoRespuesta.getId());
+                        for (DetalleReservacionProdDto prodAct: actualizada1.getProd()) {
+                            ProductoDto productoDto = productoService.obtenerProductoPorId(prodAct.getProducto().getId());
+                            productoDto.setCantidad(productoDto.getCantidad() + prodAct.getCantidad());
+                            productoService.actProdCambioEstado(productoDto,productoDto.getId());
+                        }
+                        break;
+                }
+            }else{
+                reservacionDtoRespuesta.setEstado(estado);
+                reservacionService.actualizarReservacion(reservacionDtoRespuesta,reservacionDtoRespuesta.getId());
             }
-        }else{
-            reservacionDtoRespuesta.setEstado(estado);
-            reservacionService.actualizarReservacion(reservacionDtoRespuesta,reservacionDtoRespuesta.getId());
+
+            return  new ResponseEntity(new Mensaje("Cambio de estado con exito."),HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(new Mensaje("error en el proceso"), HttpStatus.BAD_REQUEST);
         }
-
-        return  new ResponseEntity(new Mensaje("Cambio de estado con exito."),HttpStatus.OK);
     }
-
-
 }

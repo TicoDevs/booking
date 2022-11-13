@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.mfc.booking.constantes.AppConstantes.*;
 
@@ -45,6 +46,16 @@ public class ProductoControlador {
     @GetMapping("/listar")
     public ResponseEntity<List<ProductoDto>> listar() {
         List<ProductoDto> list = productoServicio.listar();
+        return new ResponseEntity(list, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/listarImagenes")
+    public ResponseEntity<Set<ImageModel>> listarImagenes() {
+        Set<ImageModel> list = productoServicio.listar().stream()
+                .flatMap(c -> c.getImagenes()
+                        .stream())
+                .collect(Collectors.toSet());
         return new ResponseEntity(list, HttpStatus.OK);
     }
 

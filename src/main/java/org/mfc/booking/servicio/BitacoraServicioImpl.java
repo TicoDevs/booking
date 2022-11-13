@@ -1,12 +1,20 @@
 package org.mfc.booking.servicio;
 
+import org.mfc.booking.dto.BitacoraContent;
 import org.mfc.booking.dto.BitacoraDto;
 
+import org.mfc.booking.dto.ProductoContent;
+import org.mfc.booking.dto.ProductoDto;
 import org.mfc.booking.entidad.Bitacora;
+import org.mfc.booking.entidad.Producto;
 import org.mfc.booking.excepcion.ResourceNotFoundException;
 import org.mfc.booking.repositorio.BitacoraRepositorio;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,6 +62,24 @@ public class BitacoraServicioImpl implements BitacoraServicio{
         List<Bitacora> bitacoraList = bitacoraRepositorio.findAll();
         List<BitacoraDto> bitacoraDtoList = bitacoraList.stream().map(bitacora -> mappearDTO(bitacora)).collect(Collectors.toList());
         return bitacoraDtoList;
+    }
+
+    @Override
+    public BitacoraContent listarPagSort(int pageNo, int pageSize, String ordernarPor, String sortDir) {
+        Sort sort  = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())?Sort.by(ordernarPor).ascending():Sort.by(ordernarPor).descending();
+        Pageable pageable = PageRequest.of(pageNo,pageSize, sort);
+        Page<Bitacora> bitacoras = bitacoraRepositorio.findAll(pageable);
+        List<Bitacora> bitacoraList = bitacoras.getContent();
+        List<BitacoraDto> contenido = bitacoraList.stream().map(bitacora -> mappearDTO(bitacora))
+                .collect(Collectors.toList());
+        BitacoraContent bitacoraContent = new BitacoraContent();
+        bitacoraContent.setNumeroPaginas(bitacoras.getNumber());
+        bitacoraContent.setMedidaPagina(bitacoras.getSize());
+        bitacoraContent.setTotalElementos(bitacoras.getTotalElements());
+        bitacoraContent.setTotalPaginas(bitacoras.getTotalPages());
+        bitacoraContent.setUltima(bitacoras.isLast());
+        bitacoraContent.setContenido(contenido);
+        return bitacoraContent;
     }
 
     @Override
