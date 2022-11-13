@@ -1,5 +1,6 @@
 package org.mfc.booking.seguridad.controlador;
 import org.mfc.booking.dto.Mensaje;
+import org.mfc.booking.entidad.ImageModel;
 import org.mfc.booking.seguridad.dto.LoginUsuario;
 import org.mfc.booking.seguridad.dto.NuevoUsuario;
 import org.mfc.booking.seguridad.dto.UserInfoResponse;
@@ -10,17 +11,21 @@ import org.mfc.booking.seguridad.jwt.JwtProvider;
 import org.mfc.booking.seguridad.repositorio.UsuarioRepositorio;
 import org.mfc.booking.seguridad.servicio.RolServicio;
 import org.mfc.booking.seguridad.servicio.UserDetailsImpl;
+import org.mfc.booking.servicio.ProductoServicio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.mfc.booking.servicio.ProductoServicio;
+
 
 import javax.validation.Valid;
 import java.util.HashSet;
@@ -47,6 +52,8 @@ public class AuthController {
 
     @Autowired
     JwtProvider jwtProvider;
+    @Autowired
+    ProductoServicio productoServicio;
 
 
     @PostMapping("/login")
@@ -94,5 +101,13 @@ public class AuthController {
                 .body(new Mensaje("Has sido desconectado!"));
     }
 
+    @GetMapping("/listarImagenes")
+    public ResponseEntity<Set<ImageModel>> listarImagenes() {
+        Set<ImageModel> list = productoServicio.listar().stream()
+                .flatMap(c -> c.getImagenes()
+                        .stream())
+                .collect(Collectors.toSet());
+        return new ResponseEntity(list, HttpStatus.OK);
+    }
 
 }
