@@ -1,8 +1,6 @@
 package org.mfc.booking.controlador;
 
-import org.mfc.booking.dto.Mensaje;
-import org.mfc.booking.dto.UsuarioDto;
-import org.mfc.booking.dto.UsuarioRespuesta;
+import org.mfc.booking.dto.*;
 import org.mfc.booking.seguridad.dto.NuevoUsuario;
 import org.mfc.booking.seguridad.dto.RolDto;
 import org.mfc.booking.seguridad.servicio.RolServicio;
@@ -91,6 +89,21 @@ public class UsuarioControlador {
             return new ResponseEntity(new Mensaje("Ya existe una cuenta con ese email"), HttpStatus.BAD_REQUEST);
         UsuarioDto usuarioDto = usuarioServicio.registarUsuario(nuevoUsuario);
         return  new ResponseEntity<>(usuarioDto, HttpStatus.OK);
+    }
+
+    @PostMapping("/cambiarContrasena")
+    public ResponseEntity<?> cambiarContrasena(@RequestBody CambioPassDto cambioPassDto){
+        if (!usuarioServicio.existeNombreUsuarioOEmail(cambioPassDto.getUserNameOEmail(), cambioPassDto.getUserNameOEmail()))
+            return new ResponseEntity(new Mensaje("No existe una cuenta con ese nombre de usuario"), HttpStatus.BAD_REQUEST);
+        UsuarioDto usuarioDto = usuarioServicio.obtenerPorNombreUsuarioOEmail(cambioPassDto.getUserNameOEmail());
+        NuevoUsuario nuevoUsuario = new NuevoUsuario();
+        nuevoUsuario.setNombre(usuarioDto.getNombre());
+        nuevoUsuario.setNombreUsuario(usuarioDto.getNombreUsuario());
+        nuevoUsuario.setEmail(usuarioDto.getEmail());
+        nuevoUsuario.setPassword(passwordEncoder.encode(cambioPassDto.getNewPass()));
+        nuevoUsuario.setRoles(usuarioDto.getRoles());
+        UsuarioDto usuarioDtoNew = usuarioServicio.actualizarUsuarioContraseña(nuevoUsuario, usuarioDto.getId());
+        return new ResponseEntity(new Mensaje("Cambio con exito"), HttpStatus.CREATED);
     }
 
 

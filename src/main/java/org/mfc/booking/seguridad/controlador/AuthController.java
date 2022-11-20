@@ -1,5 +1,7 @@
 package org.mfc.booking.seguridad.controlador;
 import org.mfc.booking.dto.Mensaje;
+import org.mfc.booking.dto.ResetPassDto;
+import org.mfc.booking.dto.UsuarioDto;
 import org.mfc.booking.entidad.ImageModel;
 import org.mfc.booking.seguridad.dto.LoginUsuario;
 import org.mfc.booking.seguridad.dto.NuevoUsuario;
@@ -11,6 +13,7 @@ import org.mfc.booking.seguridad.jwt.JwtProvider;
 import org.mfc.booking.seguridad.repositorio.UsuarioRepositorio;
 import org.mfc.booking.seguridad.servicio.RolServicio;
 import org.mfc.booking.seguridad.servicio.UserDetailsImpl;
+import org.mfc.booking.seguridad.servicio.UsuarioServicio;
 import org.mfc.booking.servicio.ProductoServicio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -31,7 +34,10 @@ import javax.validation.Valid;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static org.mfc.booking.constantes.AppConstantes.NUMERO_PAGINA_DEFECTO;
 
 @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600, allowCredentials="true")
 @RestController
@@ -54,6 +60,8 @@ public class AuthController {
     JwtProvider jwtProvider;
     @Autowired
     ProductoServicio productoServicio;
+    @Autowired
+    private UsuarioServicio usuarioServicio;
 
 
     @PostMapping("/login")
@@ -92,6 +100,25 @@ public class AuthController {
         usuario.setRoles(roles);
         usuarioRepositorio.save(usuario);
         return new ResponseEntity(new Mensaje("Usuario guardado"), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/validarOTP")
+    public ResponseEntity<?> validarOtp(@RequestBody ResetPassDto resetPassDto){
+        if (!usuarioServicio.existeNombreUsuarioOEmail(resetPassDto.getUserNameOEmail(), resetPassDto.getUserNameOEmail()))
+            return new ResponseEntity(new Mensaje("No existe una cuenta con ese nombre de usuario"), HttpStatus.BAD_REQUEST);
+        UsuarioDto usuarioDto = usuarioServicio.obtenerPorNombreUsuarioOEmail(resetPassDto.getUserNameOEmail());
+        if (usuarioDto.getPassword().equals(resetPassDto.getOtp())){
+            NuevoUsuario nuevoUsuario = new NuevoUsuario();
+            nuevoUsuario.setNombre(usuarioDto.getNombre());
+            nuevoUsuario.setNombreUsuario(usuarioDto.getNombreUsuario());
+            nuevoUsuario.setEmail(usuarioDto.getEmail());
+            nuevoUsuario.setPassword(passwordEncoder.encode(resetPassDto.getNewPass()));
+            nuevoUsuario.setRoles(usuarioDto.getRoles());
+            UsuarioDto usuarioDtoNew = usuarioServicio.actualizarUsuarioContraseña(nuevoUsuario, usuarioDto.getId());
+            return new ResponseEntity(new Mensaje("Cambio de contraseña con exito"), HttpStatus.CREATED);
+        }else {
+            return new ResponseEntity(new Mensaje("OTP no coincide"), HttpStatus.BAD_REQUEST);
+        }
     }
 
    @PostMapping("/signout")

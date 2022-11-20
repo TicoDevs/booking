@@ -120,6 +120,11 @@ public class UsuarioServicioImpl implements UsuarioServicio{
         return usuarioRepositorio.existsByEmail(email);
     }
 
+    @Override
+    public boolean existeNombreUsuarioOEmail(String username, String email) {
+        return usuarioRepositorio.existsByNombreUsuarioOrEmail(username, email);
+    }
+
 
     @Override
     public UsuarioDto actualizarUsuario(NuevoUsuario nuevoUsuario, long id) {
@@ -129,6 +134,30 @@ public class UsuarioServicioImpl implements UsuarioServicio{
         usuario.setNombreUsuario(nuevoUsuario.getNombreUsuario());
         usuario.setNombre(nuevoUsuario.getNombre());
         usuario.setEmail(nuevoUsuario.getEmail());
+        for( Rol rol : nuevoUsuario.getRoles()) {
+            if (rol.getRolNombre().equals(RolNombre.ROLE_GENE)) {
+                roles.add(rolServicio.getByRolNombre(RolNombre.ROLE_GENE).get());
+            }
+            if (rol.getRolNombre().equals(RolNombre.ROLE_AUX)) {
+                roles.add(rolServicio.getByRolNombre(RolNombre.ROLE_AUX).get());
+            }
+            if (rol.getRolNombre().equals(RolNombre.ROLE_ADMIN))
+                roles.add(rolServicio.getByRolNombre(RolNombre.ROLE_ADMIN).get());
+        }
+        usuario.setRoles(roles);
+        Usuario usuarioAct = usuarioRepositorio.save(usuario);
+        return mappearDTO(usuarioAct);
+    }
+
+    @Override
+    public UsuarioDto actualizarUsuarioContraseña(NuevoUsuario nuevoUsuario, long id) {
+        Set<Rol> roles = new HashSet<>();
+        Usuario usuario =  usuarioRepositorio.findById(id)
+                .orElseThrow(() ->new ResourceNotFoundException("Usuario","Id", String.valueOf(id)));
+        usuario.setNombreUsuario(nuevoUsuario.getNombreUsuario());
+        usuario.setNombre(nuevoUsuario.getNombre());
+        usuario.setEmail(nuevoUsuario.getEmail());
+        usuario.setPassword(nuevoUsuario.getPassword());
         for( Rol rol : nuevoUsuario.getRoles()) {
             if (rol.getRolNombre().equals(RolNombre.ROLE_GENE)) {
                 roles.add(rolServicio.getByRolNombre(RolNombre.ROLE_GENE).get());

@@ -35,6 +35,8 @@ public class ReservacionControlador {
     @Autowired
     private Utilidades util;
 
+    @Autowired
+    private  EmailSenderService emailSenderService;
 
 
     @PostMapping("/crearReservacion")
@@ -63,10 +65,11 @@ public class ReservacionControlador {
         }
          nuevaReserv.setProd(setDet);
         if (salida.isEmpty()){
-            reservacionService.crearReservProd(nuevaReserv);
+            ReservacionDto newResrv = reservacionService.crearReservProd(nuevaReserv);
             for (ProductoDto actProd: setProd) {
                 productoService.actualizarProductoReserv(actProd, actProd.getId());
             }
+            this.emailSenderService.sendEmailToAdmin(newResrv);
             return  new ResponseEntity(new Mensaje("Reserva realizada con exito"),HttpStatus.OK);
         }else{
             return  new ResponseEntity(new Mensaje("No se pudo realizar la reserva." + salida),HttpStatus.OK);
@@ -81,8 +84,10 @@ public class ReservacionControlador {
         nuevaReserv.setTipo(Integer.valueOf(1));
         nuevaReserv.setUsuario(util.obtenerUsuarioActual());
         nuevaReserv.setDetalleReserva(reservacionCitaDto.getDetalleReserva());
-        if (reservacionService.crearReservCita(nuevaReserv) == null)
+        ReservacionDto res = reservacionService.crearReservCita(nuevaReserv);
+        if (res == null)
           return  new ResponseEntity(new Mensaje("No se pudo realizar la reserva." ),HttpStatus.BAD_REQUEST);
+        this.emailSenderService.sendEmailToAdmin(res);
         return  new ResponseEntity(new Mensaje("Reserva realizada con exito." ),HttpStatus.OK);
     }
 
@@ -157,6 +162,7 @@ public class ReservacionControlador {
                             bit.setUltimaModificacion(new Date());
                             bit.setDescripcion("Producto: " + prodAct.getProducto().getNombre() + " ISBN:" + prodAct.getProducto().getCodigo() + " Proceso: Entrega Libro" + " /Miembro: " + usu.getNombre());
                             bitacoraServicio.crearBitacora(bit);
+                            this.emailSenderService.sendEmailToMiembro(actualizada);
                         }
                         break;
                     case 2:
@@ -168,11 +174,13 @@ public class ReservacionControlador {
                             productoDto.setCantidad(productoDto.getCantidad() + prodAct.getCantidad());
                             productoService.actProdCambioEstado(productoDto,productoDto.getId());
                         }
+                        this.emailSenderService.sendEmailToMiembro(actualizada1);
                         break;
                 }
             }else{
                 reservacionDtoRespuesta.setEstado(estado);
-                reservacionService.actualizarReservacion(reservacionDtoRespuesta,reservacionDtoRespuesta.getId());
+                ReservacionDto actualizadaCita = reservacionService.actualizarReservacion(reservacionDtoRespuesta,reservacionDtoRespuesta.getId());
+                this.emailSenderService.sendEmailToMiembro(actualizadaCita);
             }
 
             return  new ResponseEntity(new Mensaje("Cambio de estado con exito."),HttpStatus.OK);

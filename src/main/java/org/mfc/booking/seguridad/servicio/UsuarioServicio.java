@@ -19,7 +19,11 @@ public interface UsuarioServicio {
     public UsuarioDto obtenerUsuarioPorId(long id);
     public boolean existePorNombreUsuario(String nombreUsuario);
     public boolean existePorEmail(String email);
+
+    public boolean existeNombreUsuarioOEmail(String username, String email);
     public UsuarioDto actualizarUsuario(NuevoUsuario nuevoUsuario, long id);
+
+    public UsuarioDto actualizarUsuarioContraseña(NuevoUsuario nuevoUsuario, long id);
     public void eliminarUsuario(long id);
 
 }
