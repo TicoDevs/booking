@@ -48,9 +48,9 @@ public class ReservacionServicioImpl implements  ReservacionServicio{
     public ReservacionContent listarPagSort(int pageNo, int pageSize, String ordernarPor, String sortDir) {
         Sort sort  = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())?Sort.by(ordernarPor).ascending():Sort.by(ordernarPor).descending();
         Pageable pageable = PageRequest.of(pageNo,pageSize, sort);
-        Page<Reservacion> reservaciones = reservacionRepositorio.findAll(pageable);
+        Page<Reservacion> reservaciones = reservacionRepositorio.findByEstado(0, pageable);
         List<Reservacion> reservacionList = reservaciones.getContent();
-        List<ReservacionDto> contenido = reservacionList.stream().filter(e -> e.getEstado().equals(0)).map(reservacion -> mappearDTO(reservacion))
+        List<ReservacionDto> contenido = reservacionList.stream().map(reservacion -> mappearDTO(reservacion))
                 .collect(Collectors.toList());
         ReservacionContent reservacionContent = new ReservacionContent();
         reservacionContent.setNumeroPaginas(reservaciones.getNumber());
@@ -66,9 +66,9 @@ public class ReservacionServicioImpl implements  ReservacionServicio{
     public ReservacionContent listarProdPagSort(int pageNo, int pageSize, String ordernarPor, String sortDir) {
         Sort sort  = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())?Sort.by(ordernarPor).ascending():Sort.by(ordernarPor).descending();
         Pageable pageable = PageRequest.of(pageNo,pageSize, sort);
-        Page<Reservacion> reservaciones = reservacionRepositorio.findAll(pageable);
+        Page<Reservacion> reservaciones = reservacionRepositorio.findByEstado(0, pageable);
         List<Reservacion> reservacionList = reservaciones.getContent();
-        List<ReservacionDto> contenido = reservacionList.stream().filter(e -> e.getTipo().equals(0)).map(reservacion -> mappearDTO(reservacion))
+        List<ReservacionDto> contenido = reservacionList.stream().map(reservacion -> mappearDTO(reservacion))
                 .collect(Collectors.toList());
         ReservacionContent reservacionContent = new ReservacionContent();
         reservacionContent.setNumeroPaginas(reservaciones.getNumber());
@@ -84,7 +84,7 @@ public class ReservacionServicioImpl implements  ReservacionServicio{
     public ReservacionContent listarCitaPagSort(int pageNo, int pageSize, String ordernarPor, String sortDir) {
         Sort sort  = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())?Sort.by(ordernarPor).ascending():Sort.by(ordernarPor).descending();
         Pageable pageable = PageRequest.of(pageNo,pageSize, sort);
-        Page<Reservacion> reservaciones = reservacionRepositorio.findAll(pageable);
+        Page<Reservacion> reservaciones = reservacionRepositorio.findByEstado(0, pageable);
         List<Reservacion> reservacionList = reservaciones.getContent();
         List<ReservacionDto> contenido = reservacionList.stream().filter(e -> e.getTipo().equals(1)).map(reservacion -> mappearDTO(reservacion))
                 .collect(Collectors.toList());
