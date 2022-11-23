@@ -91,6 +91,7 @@ public class UsuarioControlador {
         return  new ResponseEntity<>(usuarioDto, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','AUX', 'GENE')")
     @PostMapping("/cambiarContrasena")
     public ResponseEntity<?> cambiarContrasena(@RequestBody CambioPassDto cambioPassDto){
         if (!usuarioServicio.existeNombreUsuarioOEmail(cambioPassDto.getUserNameOEmail(), cambioPassDto.getUserNameOEmail()))
@@ -101,6 +102,7 @@ public class UsuarioControlador {
         nuevoUsuario.setNombreUsuario(usuarioDto.getNombreUsuario());
         nuevoUsuario.setEmail(usuarioDto.getEmail());
         nuevoUsuario.setPassword(passwordEncoder.encode(cambioPassDto.getNewPass()));
+        nuevoUsuario.setTelefono(usuarioDto.getTelefono());
         nuevoUsuario.setRoles(usuarioDto.getRoles());
         UsuarioDto usuarioDtoNew = usuarioServicio.actualizarUsuarioContraseña(nuevoUsuario, usuarioDto.getId());
         return new ResponseEntity(new Mensaje("Cambio con exito"), HttpStatus.CREATED);

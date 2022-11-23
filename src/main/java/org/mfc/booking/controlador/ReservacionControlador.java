@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -38,7 +39,7 @@ public class ReservacionControlador {
     @Autowired
     private  EmailSenderService emailSenderService;
 
-
+    @PreAuthorize("hasAnyRole('ADMIN','AUX', 'GENE')")
     @PostMapping("/crearReservacion")
     public ResponseEntity<ReservacionDto> crearReservacion(@RequestBody ReservacionProdDto reservacionProdDto){
         Set<String> salida = new HashSet<>();
@@ -76,6 +77,7 @@ public class ReservacionControlador {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','AUX', 'GENE')")
     @PostMapping("/crearReservacionCita")
     public ResponseEntity<?> crearReservacionCita(@RequestBody ReservacionCitaDto reservacionCitaDto){
         ReservacionDto nuevaReserv = new ReservacionDto();
@@ -137,6 +139,7 @@ public class ReservacionControlador {
         return ResponseEntity.ok(fechas);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','AUX')")
     @PutMapping("/cambiaEstadoReservacion/{id}/{estado}")
     public ResponseEntity<?> cambiaEstadoReservacion(@PathVariable(name = "id")long id, @PathVariable(name = "estado")int estado){
         if(!this.reservacionService.existePorId(id))

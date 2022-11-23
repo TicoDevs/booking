@@ -32,7 +32,7 @@ public class ProductoControlador {
     @Autowired
     ProductoServicio productoServicio;
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','AUX', 'GENE')")
     @GetMapping("/listarPageSort")
     public ResponseEntity<ProductoContent> listarProductosContent(
             @RequestParam(value = "pageNo", defaultValue = NUMERO_PAGINA_DEFECTO, required = false) int pageNo,
@@ -42,14 +42,14 @@ public class ProductoControlador {
         return new ResponseEntity(productoServicio.listarPagSort(pageNo, pageSize, ordernarPor, sortDir), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','AUX', 'GENE')")
     @GetMapping("/listar")
     public ResponseEntity<List<ProductoDto>> listar() {
         List<ProductoDto> list = productoServicio.listar();
         return new ResponseEntity(list, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','AUX', 'GENE')")
     @GetMapping("/listarImagenes")
     public ResponseEntity<Set<ImageModel>> listarImagenes() {
         Set<ImageModel> list = productoServicio.listar().stream()
@@ -59,13 +59,13 @@ public class ProductoControlador {
         return new ResponseEntity(list, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','AUX', 'GENE')")
     @GetMapping("/buscar/{id}")
     public ResponseEntity<ProductoDto> obtenerProductoPorId(@PathVariable(name = "id") long id) {
         return ResponseEntity.ok(productoServicio.obtenerProductoPorId(id));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','AUX')")
     @PostMapping(value = "/crear", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> crear(@RequestPart("product") ProductoDto productoDto, @RequestPart("imgFile")MultipartFile[] file) {
         try {
@@ -95,7 +95,7 @@ public class ProductoControlador {
         }
         return imageModels;
     }
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','AUX')")
     @PutMapping(value ="/modificar", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> actualizarUsuario(@RequestPart("product") ProductoDto productoDto, @RequestPart("imgFile")MultipartFile[] file){
         if(!this.productoServicio.existePorId(productoDto.getId()))
@@ -114,7 +114,7 @@ public class ProductoControlador {
         }
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','AUX')")
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<String> eliminarProducto(@PathVariable(name = "id")long id){
         productoServicio.eliminarProducto(id);

@@ -22,11 +22,13 @@ public class Usuario {
     @JoinTable(name = "usuario_rol", joinColumns = @JoinColumn(name = "usuario_id"),
             inverseJoinColumns = @JoinColumn(name = "rol_id"))
     private Set<Rol> roles = new HashSet<>();
+    private String telefono;
     
-    public Usuario(String nombre, String nombreUsuario, String email, String password) {
+    public Usuario(String nombre, String nombreUsuario, String email, String password, String telefono) {
         this.nombre = nombre;
         this.nombreUsuario = nombreUsuario;
         this.email = email;
         this.password = password;
+        this.telefono = telefono;
     }
 }

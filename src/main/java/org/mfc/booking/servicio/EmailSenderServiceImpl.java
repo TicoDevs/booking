@@ -154,6 +154,14 @@ public class EmailSenderServiceImpl implements EmailSenderService {
                     "<table style=Ffont-family:arial,helvetica,sans-serif;' role='presentation' cellpadding='0' cellspacing='0' width='100%' border='0'><tbody>"+
                     "<tr><td style='overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:arial,helvetica,sans-serif;' align='left'> "+
                     "<div><strong>Notificación reserva realizada</strong></div></td></tr>"+
+                    "<tr><td style='overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:arial,helvetica,sans-serif;' align='left'> "+
+                    "<div><strong>Datos del miembro</strong></div></td></tr>"+
+                    "<tr><td style='overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:arial,helvetica,sans-serif;' align='left'> "+
+                    "<div><p style='font-size: 14px; line-height: 140%;'>Nombre: "+ reservacionDto.getUsuario().getNombre() + " </p></div></td></tr>"+
+                    "<tr><td style='overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:arial,helvetica,sans-serif;' align='left'> "+
+                    "<div><p style='font-size: 14px; line-height: 140%;'>Email: "+ reservacionDto.getUsuario().getEmail() + " </p></div></td></tr>"+
+                    "<tr><td style='overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:arial,helvetica,sans-serif;' align='left'> "+
+                    "<div><p style='font-size: 14px; line-height: 140%;'>Teléfono: "+ reservacionDto.getUsuario().getTelefono() + " </p></div></td></tr>"+
                     "<tr><td style='overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:arial,helvetica,sans-serif;' align='left'>"+
                     "<div style='line-height: 140%; text-align: left; word-wrap: break-word;'>"+
                     "<p style='font-size: 14px; line-height: 140%;'>Numero de Reserva pendiente de aprobación: "+ reservacionDto.getId() + "</p></div></td></tr>"+

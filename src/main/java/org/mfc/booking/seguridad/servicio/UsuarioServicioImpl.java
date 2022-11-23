@@ -47,7 +47,7 @@ public class UsuarioServicioImpl implements UsuarioServicio{
     public UsuarioDto registarUsuario(NuevoUsuario nuevoUsuario) {
         Usuario usuario =
                 new Usuario(nuevoUsuario.getNombre(), nuevoUsuario.getNombreUsuario(), nuevoUsuario.getEmail(),
-                        passwordEncoder.encode(nuevoUsuario.getPassword()));
+                        passwordEncoder.encode(nuevoUsuario.getPassword()), nuevoUsuario.getTelefono());
         Set<Rol> roles = new HashSet<>();
         for( Rol rol : nuevoUsuario.getRoles()) {
             if (rol.getRolNombre().equals(RolNombre.ROLE_GENE)) {
@@ -134,6 +134,7 @@ public class UsuarioServicioImpl implements UsuarioServicio{
         usuario.setNombreUsuario(nuevoUsuario.getNombreUsuario());
         usuario.setNombre(nuevoUsuario.getNombre());
         usuario.setEmail(nuevoUsuario.getEmail());
+        usuario.setTelefono(nuevoUsuario.getTelefono());
         for( Rol rol : nuevoUsuario.getRoles()) {
             if (rol.getRolNombre().equals(RolNombre.ROLE_GENE)) {
                 roles.add(rolServicio.getByRolNombre(RolNombre.ROLE_GENE).get());
@@ -158,6 +159,7 @@ public class UsuarioServicioImpl implements UsuarioServicio{
         usuario.setNombre(nuevoUsuario.getNombre());
         usuario.setEmail(nuevoUsuario.getEmail());
         usuario.setPassword(nuevoUsuario.getPassword());
+        usuario.setTelefono(nuevoUsuario.getTelefono());
         for( Rol rol : nuevoUsuario.getRoles()) {
             if (rol.getRolNombre().equals(RolNombre.ROLE_GENE)) {
                 roles.add(rolServicio.getByRolNombre(RolNombre.ROLE_GENE).get());

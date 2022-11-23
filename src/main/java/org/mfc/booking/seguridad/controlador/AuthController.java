@@ -89,7 +89,7 @@ public class AuthController {
             return new ResponseEntity(new Mensaje("Ya existe una cuenta con ese email"), HttpStatus.BAD_REQUEST);
         Usuario usuario =
                 new Usuario(nuevoUsuario.getNombre(), nuevoUsuario.getNombreUsuario(), nuevoUsuario.getEmail(),
-                        passwordEncoder.encode(nuevoUsuario.getPassword()));
+                        passwordEncoder.encode(nuevoUsuario.getPassword()), nuevoUsuario.getTelefono());
         Set<Rol> roles = new HashSet<>();
         roles.add(rolServicio.getByRolNombre(RolNombre.ROLE_GENE).get());
         /*if(nuevoUsuario.getRoles().contains("admin") || nuevoUsuario.getRoles().contains("auxi")){
@@ -113,6 +113,7 @@ public class AuthController {
             nuevoUsuario.setNombreUsuario(usuarioDto.getNombreUsuario());
             nuevoUsuario.setEmail(usuarioDto.getEmail());
             nuevoUsuario.setPassword(passwordEncoder.encode(resetPassDto.getNewPass()));
+            nuevoUsuario.setTelefono(usuarioDto.getTelefono());
             nuevoUsuario.setRoles(usuarioDto.getRoles());
             UsuarioDto usuarioDtoNew = usuarioServicio.actualizarUsuarioContraseña(nuevoUsuario, usuarioDto.getId());
             return new ResponseEntity(new Mensaje("Cambio de contraseña con exito"), HttpStatus.CREATED);

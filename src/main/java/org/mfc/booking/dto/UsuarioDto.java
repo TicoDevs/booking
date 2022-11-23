@@ -23,5 +23,6 @@ public class UsuarioDto {
     private String email;
     private String password;
     private Set<Rol> roles = new HashSet<>();
+    private String telefono;
 
 }

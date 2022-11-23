@@ -79,7 +79,6 @@ public class ReservacionServicioImpl implements  ReservacionServicio{
         reservacionContent.setContenido(contenido);
         return reservacionContent;
     }
-
     @Override
     public ReservacionContent listarCitaPagSort(int pageNo, int pageSize, String ordernarPor, String sortDir) {
         Sort sort  = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())?Sort.by(ordernarPor).ascending():Sort.by(ordernarPor).descending();
