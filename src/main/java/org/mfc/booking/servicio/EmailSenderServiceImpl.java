@@ -81,7 +81,7 @@ public class EmailSenderServiceImpl implements EmailSenderService {
                     "<div><strong>Hola </strong><strong>"+ name +" !!!!</strong> </div></td></tr>"+
                     "<tr><td style='overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:arial,helvetica,sans-serif;' align='left'>"+
                     "<div style='line-height: 140%; text-align: left; word-wrap: break-word;'>"+
-                    "<p style='font-size: 14px; line-height: 140%;'>Su contraseña de un solo uso para el registro es: <strong>"+ newToken +"</strong></p></div></td></tr>"+
+                    "<p style='font-size: 14px; line-height: 140%;'>Su OTP para cambio de contraseña es: <strong>"+ newToken +"</strong></p></div></td></tr>"+
                     "<tr><td style='overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:arial,helvetica,sans-serif;' align='left'>"+
                     "<div style='line-height: 140%; text-align: left; word-wrap: break-word;'>"+
                     "<p style='font-size: 14px; line-height: 140%;'>Utilice esta OTP para completar su nuevo registro de usuario.  OTP es confidencial, no comparta esto con nadie.</p>"+
