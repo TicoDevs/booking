@@ -68,7 +68,7 @@ public class ReservacionServicioImpl implements  ReservacionServicio{
         Pageable pageable = PageRequest.of(pageNo,pageSize, sort);
         Page<Reservacion> reservaciones = reservacionRepositorio.findByEstado(0, pageable);
         List<Reservacion> reservacionList = reservaciones.getContent();
-        List<ReservacionDto> contenido = reservacionList.stream().map(reservacion -> mappearDTO(reservacion))
+        List<ReservacionDto> contenido = reservacionList.stream().filter(e -> e.getTipo().equals(0)).map(reservacion -> mappearDTO(reservacion))
                 .collect(Collectors.toList());
         ReservacionContent reservacionContent = new ReservacionContent();
         reservacionContent.setNumeroPaginas(reservaciones.getNumber());
